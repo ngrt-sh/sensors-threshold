@@ -34,15 +34,40 @@ You can stress the CPU to check if the webhook notifications send properly.
 
 ## Schedule the script execution at the machine startup
 
-1. Open the cronjobs file by `crontab -e`
-2. Add this line à the end of your file:
+We need to create a systemd service to be started at the startup machine.
+
+1. Make a service file for systemd
 ```
-@reboot /usr/local/bin/cpu-threshold.sh
+sudo nano /etc/systemd/system/sensors-threshold.service
 ```
 
-> Make sure have run `chmod +x /usr/local/bin/cpu-threshold.sh` before
+2. Add the following content:
+```
+[Unit]
+Description=A temperature sensor threshold for Linux and warn you if anormal temp is detected via Discord Webhook
+After=network.target
 
-3. Save and exit.
+[Service]
+ExecStart=/usr/local/bin/cpu-threshold.sh
+Restart=always
+User=root
+Environment=WEBHOOK_URL= #PUT YOUR DISCORD WEBHOOK URL HERE
+
+[Install]
+WantedBy=multi-user.target
+```
+
+3. Reload systemd and enable the service
+```
+sudo systemctl daemon-reload
+sudo systemctl enable sensors-threshold.service
+sudo systemctl start sensors-threshold.service
+```
+
+4. Check if the `sensors-threshold.service` is running
+```
+sudo systemctl status sensors-threshold.service
+```
 
 # Issues
 
